@@ -1,0 +1,277 @@
+---
+title: "Child Development Analysis"
+author: "Tsebaot Shewarega"
+date: "2022-04-29"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+setwd("/Users/tsebaotshewarega/Documents/Freshman year/Spring 2022/QTM lab/Lab_Datasets_export")
+Children_Dataset <- read.csv("Children_Dataset.csv")
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Factor 1: Comunication with Friends 
+
+```{r}
+## Summary table
+table(Children_Dataset$Communication_with_friends)
+```
+
+```{r}
+# Recoding Communication_with_friends to Communication_mode
+Children_Dataset$Communication_mode <- factor(NA,levels=c("In person","Online")) 
+#this creates a new variable with NA entries and two factors ^
+Children_Dataset$Communication_mode [Children_Dataset$Communication_with_friends == 'In person']<- "In person"
+#we begin assigning observations to this new variable based on each record's observation in the Communication_with_friends variable.
+Children_Dataset$Communication_mode [Children_Dataset$Communication_with_friends == 'Cell phone' |
+                                     Children_Dataset$Communication_with_friends == 'E-mail'|
+                                     Children_Dataset$Communication_with_friends == 'Internet chat or instant messaging'|
+                                     Children_Dataset$Communication_with_friends == 'Myspace, Facebook, other social networking sites, or blog'|
+                                     Children_Dataset$Communication_with_friends == 'Other'|
+                                     Children_Dataset$Communication_with_friends == 'Telephone'|
+                                     Children_Dataset$Communication_with_friends == 'Text messaging']<- "Online"
+#This completes the recoding to assign all non "In-person" communication to the "Online" level of the new variable.
+
+#verify the recoding
+table(Children_Dataset$Communication_mode,Children_Dataset$Communication_with_friends)
+```
+
+```{r}
+#view the summary 
+summary(Children_Dataset$Activities_hanging_out_with_friends_hours)
+
+#view the histogram
+hist(Children_Dataset$Activities_hanging_out_with_friends_hours)
+```
+
+```{r}
+# Recoding Activities_hanging_out_with_friends_hours to hanging_out_hours
+Children_Dataset$hanging_out_hours <- factor(NA,levels=c("below 10","10-20", "20-30", "30-40",  "above 40")) 
+
+Children_Dataset$hanging_out_hours [Children_Dataset$Activities_hanging_out_with_friends_hours <10] <-"below 10"
+Children_Dataset$hanging_out_hours [Children_Dataset$Activities_hanging_out_with_friends_hours >=10 &
+                                      Children_Dataset$Activities_hanging_out_with_friends_hours <=20 ] <-"10-20"
+Children_Dataset$hanging_out_hours [Children_Dataset$Activities_hanging_out_with_friends_hours >20 &
+                                      Children_Dataset$Activities_hanging_out_with_friends_hours <=30 ] <-"20-30"
+Children_Dataset$hanging_out_hours [Children_Dataset$Activities_hanging_out_with_friends_hours >30 &
+                                      Children_Dataset$Activities_hanging_out_with_friends_hours <=40 ] <-"30-40"
+Children_Dataset$hanging_out_hours [Children_Dataset$Activities_hanging_out_with_friends_hours >40] <-"above 40"
+```
+
+```{r}
+# Verify the recoding
+table(Children_Dataset$hanging_out_hours, Children_Dataset$Activities_hanging_out_with_friends_hours)
+#The recoding matches the expected the result and is thus correct.
+```
+
+
+```{r}
+#making a side by side barplot 
+
+# Creating a contingency table
+relationship.tab <- table(Children_Dataset$Communication_mode, Children_Dataset$hanging_out_hours) 
+relationship.tab
+
+# Proportion table
+relationship.frequency <- prop.table(relationship.tab, margin= 2)
+relationship.frequency
+
+# bar plot
+barplot(relationship.frequency, beside = T, legend.text = T, 
+        main = "  Proportion of hanging out hours among 
+      children with different communication mode",
+        xlab = "Hanging out time (Hours) ", 
+        ylab = "Proportion",
+        args.legend=list(x="bottomleft",title="Communication Method", cex=0.5,inset=c(-0.1,-0.45))) #the last argument defines the position of the legend so it doesn't cut off the bar plot
+```
+
+### Statistical Significance: Chi-Square Test 
+```{r}
+
+# Contingency table for chi-square test
+relationshipTable <- table(Children_Dataset$Communication_mode, Children_Dataset$hanging_out_hours)
+
+# Perform chi-square test
+chisq.test(relationshipTable,correct=F)
+Chisquare<- chisq.test(relationshipTable,correct=F)
+
+# Observing expected values
+Chisquare$expected
+
+#Each epxected cell count > 5 , thus the chi square inference assumptions hold true and our test result is a valid outcome. 
+```
+
+## Factor 2: Diet  
+
+```{r}
+# Summary of the Vegetarian variable
+summary(Children_Dataset$Vegetarian)
+
+# Frequency table of Vegetarian variable
+table(Children_Dataset$Vegetarian)
+```
+
+```{r}
+# Histogram of Height_cm
+hist(Children_Dataset$Height_cm, breaks = 30, main = "Distribution of Heights", 
+     xlab = "Height (cm)", col = "blue", border = "black")
+```
+
+
+
+```{r}
+# Boxplot of Height by Vegetarian status
+boxplot(Children_Dataset$Height_cm ~ Children_Dataset$Vegetarian, 
+        main = "Height by Vegetarian Status", 
+        xlab = "Vegetarian?", 
+        ylab = "Height (cm)", 
+        col = "green")
+```
+
+```{r}
+# Mean height by Vegetarian status
+tapply(Children_Dataset$Height_cm, Children_Dataset$Vegetarian, mean)
+
+# Standard deviation of height by Vegetarian status
+tapply(Children_Dataset$Height_cm, Children_Dataset$Vegetarian, sd)
+```
+
+### Statistical Significance: Two-sample t-test
+```{r}
+# Two-sample t-test
+t.test(Children_Dataset$Height_cm ~ Children_Dataset$Vegetarian)
+#with p-value = 0.4395, fail to reject null and can conclude the data does not provide sufficient evidence to support the hypothesis that the means are signficantly different.
+```
+
+## Factor 3: Homework Hours 
+
+```{r}
+# View proportions and frequency table of Favorite_school_subject
+prop.table(table(Children_Dataset$Favorite_school_subject))
+table(Children_Dataset$Favorite_school_subject)
+
+# Recoding Favorite_school_subject into Favorite_subject with 5 categories
+Children_Dataset$Favorite_subject <- factor(NA, levels = c("STEM", "Humanities", "Social Sciences", "PE", "Other"))
+
+# Assign levels based on subject groupings
+Children_Dataset$Favorite_subject[Children_Dataset$Favorite_school_subject %in% 
+                                   c("Computers and technology", "Mathematics and statistics", "Science")] <- "STEM"
+Children_Dataset$Favorite_subject[Children_Dataset$Favorite_school_subject %in% 
+                                   c("Art", "English", "Music", "Languages")] <- "Humanities"
+Children_Dataset$Favorite_subject[Children_Dataset$Favorite_school_subject %in% 
+                                   c("Geography", "History", "Social studies")] <- "Social Sciences"
+Children_Dataset$Favorite_subject[Children_Dataset$Favorite_school_subject == "Physical education"] <- "PE"
+Children_Dataset$Favorite_subject[Children_Dataset$Favorite_school_subject == "Other"] <- "Other"
+
+# Verify recoding
+table(Children_Dataset$Favorite_school_subject, Children_Dataset$Favorite_subject)
+table(Children_Dataset$Favorite_subject)
+```
+
+```{r}
+# Boxplot for homework hours by favorite subject
+boxplot(Children_Dataset$Activities_doing_homework_hours ~ Children_Dataset$Favorite_subject,
+        main = "Homework Hours by Favorite Subject",
+        xlab = "Favorite Subject",
+        ylab = "Homework Hours",
+        col = c("blue", "green", "orange", "purple", "red"))
+```
+
+
+```{r}
+# Mean homework hours by favorite subject
+tapply(Children_Dataset$Activities_doing_homework_hours, Children_Dataset$Favorite_subject, mean)
+```
+
+
+```{r}
+# Histograms for each subject category
+hist(Children_Dataset$Activities_doing_homework_hours[Children_Dataset$Favorite_subject == "STEM"],
+     main = "Homework Hours (STEM)", xlab = "Hours", col = "blue")
+hist(Children_Dataset$Activities_doing_homework_hours[Children_Dataset$Favorite_subject == "Humanities"],
+     main = "Homework Hours (Humanities)", xlab = "Hours", col = "green")
+hist(Children_Dataset$Activities_doing_homework_hours[Children_Dataset$Favorite_subject == "Social Sciences"],
+     main = "Homework Hours (Social Sciences)", xlab = "Hours", col = "orange")
+hist(Children_Dataset$Activities_doing_homework_hours[Children_Dataset$Favorite_subject == "PE"],
+     main = "Homework Hours (PE)", xlab = "Hours", col = "purple")
+hist(Children_Dataset$Activities_doing_homework_hours[Children_Dataset$Favorite_subject == "Other"],
+     main = "Homework Hours (Other)", xlab = "Hours", col = "red")
+
+```
+
+```{r}
+# ANOVA test
+anova_model <- aov(Children_Dataset$Activities_doing_homework_hours ~ Children_Dataset$Favorite_subject)
+summary(anova_model)
+
+```
+
+```{r}
+# Tukey HSD test
+TukeyHSD(anova_model)
+plot(TukeyHSD(anova_model), las = 1)
+```
+
+## Factor 4: Sleep 
+
+```{r}
+# Summary statistics and histograms
+summary(Children_Dataset$Sleep_hours_schoolnight)
+hist(Children_Dataset$Sleep_hours_schoolnight, main = "Distribution of Sleep Hours", xlab = "Sleep Hours", col = "blue")
+
+summary(Children_Dataset$Home_occupants)
+hist(Children_Dataset$Home_occupants, main = "Distribution of Home Occupants", xlab = "Home Occupants", col = "green")
+
+```
+
+```{r}
+# Scatter plot
+plot(Children_Dataset$Home_occupants, Children_Dataset$Sleep_hours_schoolnight, 
+     main = "Sleep Hours by Home Occupants",
+     xlab = "Number of Home Occupants",
+     ylab = "Sleep Hours on School Nights",
+     col = "purple", pch = 19)
+
+```
+
+```{r}
+# Correlation coefficient
+cor(Children_Dataset$Home_occupants, Children_Dataset$Sleep_hours_schoolnight)
+
+# Correlation test
+cor.test(Children_Dataset$Home_occupants, Children_Dataset$Sleep_hours_schoolnight)
+```
+
+```{r}
+# Linear model
+m2 <- lm(Children_Dataset$Sleep_hours_schoolnight ~ Children_Dataset$Home_occupants)
+summary(m2)
+```
+
+```{r}
+# Residual analysis
+# Regular residuals
+hist(resid(m2), main = "Residuals Histogram", xlab = "Residuals", col = "orange")
+qqnorm(resid(m2))
+qqline(resid(m2))
+
+# Standardized residuals
+hist(rstandard(m2), main = "Standardized Residuals Histogram", xlab = "Standardized Residuals", col = "red")
+qqnorm(rstandard(m2))
+qqline(rstandard(m2))
+
+```
+
+```{r}
+# Predicted value and residual for the first observation
+predict(m2)[1]
+resid(m2)[1]
+
+```
+
+```{r}
+# Standardized residuals vs fitted values
+plot(predict(m2), rstandard(m2), xlab = "Fitted Values", ylab = "Standardized Residuals", main = "Residuals vs Fitted Values")
+abline(h = 0, lty = 2)
+```
