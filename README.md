@@ -1,4 +1,4 @@
-# child-development-analysis
+# Child-Development-Analysis
 
 This project explores various factors influencing child development using a dataset of children’s activities, preferences, and characteristics. The study focuses on variables such as communication methods, sleep habits, household size, and academic preferences to determine their influence on various developmental metrics.
 
@@ -24,6 +24,18 @@ This project explores various factors influencing child development using a data
 - Examined the relationship between sleep hours on school nights and the number of household occupants.
 - Conducted correlation analysis and linear regression to assess the strength and nature of the relationship.
 - Evaluated residuals for model accuracy.
+
+
+
+## Dependencies
+
+R: Version 4.0 or higher
+
+Libraries:
+  - ggplot2
+  - dplyr
+  - knitr
+
 
 ## Conclusion
 
